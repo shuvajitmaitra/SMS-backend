@@ -1,4 +1,4 @@
-require("dotenv").config();
+// require("dotenv").config({ path: "./env" });
 
 import mongoose from "mongoose";
 import connectDB from "./db";
