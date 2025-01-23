@@ -1,1 +1,1 @@
-export const DB_NAME = "anonymousSMSDB";
+export const DB_NAME = "test";
