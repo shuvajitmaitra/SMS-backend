@@ -14,12 +14,12 @@ const PORT = process.env.PORT || 5001;
 const startServer = async () => {
   try {
     // Connect to database
-    await connectDB();
+    // await connectDB();
 
-    // Set up error handling for the app
-    app.on("error", (error) => {
-      console.error("Express app error:", error);
-    });
+    // // Set up error handling for the app
+    // app.on("error", (error) => {
+    //   console.error("Express app error:", error);
+    // });
 
     // Start the server
     const server = app.listen(PORT, () => {
