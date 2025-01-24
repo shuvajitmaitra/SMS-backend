@@ -11,42 +11,57 @@ dotenv.config({
 const PORT = process.env.PORT || 5001;
 
 // Connect to database and start server
-const startServer = async () => {
+export const startServer = async () => {
   try {
     // Connect to database
-    // await connectDB();
+    await connectDB();
 
-    // // Set up error handling for the app
-    // app.on("error", (error) => {
-    //   console.error("Express app error:", error);
-    // });
-
-    // Start the server
-    const server = app.listen(PORT, () => {
-      console.log(`Server is running on port: ${PORT}`);
+    // Set up error handling for the app
+    app.on("error", (error) => {
+      console.error("Express app error:", error);
     });
 
-    return server;
+    return app;
   } catch (error) {
     console.error("Failed to start server:", error);
-    process.exit(1);
+    throw error;
   }
 };
 
 // Serverless function for Vercel
 export default async function handler(req, res) {
-  const server = await startServer();
+  try {
+    const expressApp = await startServer();
 
-  // Basic health check
-  if (req.url === "/api/health") {
-    return res.status(200).json({ status: "OK" });
+    // Basic health check
+    if (req.url === "/api/health") {
+      return res.status(200).json({ status: "OK" });
+    }
+
+    // Use Express middleware to handle the request
+    return new Promise((resolve, reject) => {
+      expressApp(req, res, (err) => {
+        if (err) {
+          console.error("Request handling error:", err);
+          return reject(err);
+        }
+        resolve();
+      });
+    });
+  } catch (error) {
+    console.error("Serverless handler error:", error);
+    res.status(500).json({
+      error: "Internal Server Error",
+      message: error.message,
+    });
   }
-
-  // Delegate to Express app
-  return server(req, res);
 }
 
 // Start server if not in serverless context
 if (process.env.NODE_ENV !== "production") {
-  startServer();
+  startServer().then((app) => {
+    app.listen(PORT, () => {
+      console.log(`Server is running on port: ${PORT}`);
+    });
+  });
 }
