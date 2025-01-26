@@ -2,26 +2,17 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    username: {
+    displayName: {
       type: String,
       required: true,
-      unique: true,
       trim: true,
       minlength: 3,
       maxlength: 50,
     },
-    email: {
-      type: String,
+    pin: {
+      type: Number,
       required: true,
-      unique: true,
-      trim: true,
-      lowercase: true,
-      match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, "Please fill a valid email address"],
-    },
-    password: {
-      type: String,
-      required: true,
-      minlength: 6,
+      length: 4,
     },
     profilePicture: {
       type: String,
