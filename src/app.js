@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { mainRoutes } from "./routes/mainRoutes.js";
+import router from "./routes/mainRoutes";
 const app = express();
 
 app.use(
@@ -23,6 +23,6 @@ app.get("/", (req, res) => {
   });
 });
 
-app.use("/api/v1", mainRoutes);
+app.use("/api/v1", router);
 
 export { app };
