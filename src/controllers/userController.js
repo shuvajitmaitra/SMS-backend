@@ -2,12 +2,13 @@
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import User from "../models/User.js";
-import { generateTokens } from "../middlewares/authMiddleware.js";
 
 export const registerUser = async (req, res) => {
   try {
     const { displayName, pin } = req.body;
 
+    console.log("displayName", JSON.stringify(displayName, null, 2));
+    console.log("pin", JSON.stringify(pin, null, 2));
     const salt = await bcrypt.genSalt(Number(process.env.PASSWORD_SALT_ROUNDS));
     const hashedPin = await bcrypt.hash(pin, salt);
 
