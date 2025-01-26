@@ -1,7 +1,7 @@
 // src/routes/userRoutes.js
 import { Router } from "express";
 
-import { registerUser, loginUser, resetPin, resetPassword } from "../controllers/userController.js";
+import { registerUser, loginUser, resetPin } from "../controllers/userController.js";
 
 const router = Router();
 
