@@ -28,7 +28,7 @@ export const createChat = async (req, res) => {
     const newChat = await Chat.create({
       chatName: "sender",
       isGroupChat: false,
-      users: [req.user._id, userId],
+      users: [myHash, userId],
     });
 
     const fullChat = await Chat.findById(newChat._id).populate("users", "-password");
