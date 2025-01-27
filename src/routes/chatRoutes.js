@@ -13,7 +13,7 @@ import {
 const router = Router();
 
 // All routes require authentication
-// router.use(authenticateUser);
+router.use(authenticateUser);
 
 // One-to-one chat
 router.post("/create", createChat);

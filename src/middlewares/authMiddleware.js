@@ -4,16 +4,14 @@ import User from "../models/User.js";
 
 export const authenticateUser = async (req, res, next) => {
   try {
-    const token = req.header("Authorization")?.replace("Bearer ", "");
+    const hash = req.header("user-hash");
 
-    if (!token) {
-      return res.status(401).json({ message: "No token, authorization denied" });
+    if (!hash) {
+      return res.status(401).json({ message: "No hash, authorization denied" });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
     // Find user
-    const user = await User.findById(decoded.userId);
+    const user = await User.findById(hash);
 
     if (!user) {
       return res.status(401).json({ message: "User not found" });
@@ -36,4 +34,25 @@ export const generateTokens = (userId) => {
   });
 
   return { accessToken, refreshToken };
+};
+
+const data = {
+  _id: "6797f6a14f1acc121e166017",
+  isGroupChat: false,
+  amIBlocked: false,
+  myData: {
+    _id: "67968970df1d21b66abf2891",
+    displayName: "Test",
+    profilePicture: "",
+    isActive: true,
+  },
+  otherUser: {
+    _id: "67968cb85a3367e6cfa56b4b",
+    displayName: "How are you",
+    profilePicture: "",
+    isActive: true,
+  },
+  createdAt: "2025-01-27T21:12:01.594Z",
+  updatedAt: "2025-01-27T21:12:01.594Z",
+  __v: 0,
 };
