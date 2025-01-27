@@ -3,22 +3,23 @@ import Chat from "../models/Chat.js";
 
 export const createChat = async (req, res) => {
   try {
-    const { hash: userId } = req.body;
+    const { hash: userId, myHash } = req.body;
+    console.log("req.user:", req.user); // Debugging req.user
+    console.log("userId:", userId); // Debugging userId
 
-    if (!userId) {
+    if (!userId || !myHash) {
       return res.status(400).json({
         message: "User ID is required",
       });
     }
-
     // Check if a chat already exists between these two users
     const existingChat = await Chat.findOne({
       isGroupChat: false,
-      $and: [{ users: { $elemMatch: { $eq: req.user._id } } }, { users: { $elemMatch: { $eq: userId } } }],
+      $and: [{ users: { $elemMatch: { $eq: myHash } } }, { users: { $elemMatch: { $eq: userId } } }],
     })
       .populate("users", "-password")
       .populate("latestMessage");
-
+    console.log("existingChat", JSON.stringify(existingChat, null, 2));
     if (existingChat) {
       return res.status(200).json(existingChat);
     }
