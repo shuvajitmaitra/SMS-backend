@@ -3,7 +3,13 @@ import Chat from "../models/Chat.js";
 
 export const createChat = async (req, res) => {
   try {
-    const { userId } = req.body;
+    const { hash: userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({
+        message: "User ID is required",
+      });
+    }
 
     // Check if a chat already exists between these two users
     const existingChat = await Chat.findOne({
