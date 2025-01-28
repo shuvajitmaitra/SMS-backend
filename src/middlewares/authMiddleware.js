@@ -4,7 +4,10 @@ import User from "../models/User.js";
 
 export const authenticateUser = async (req, res, next) => {
   try {
+    console.log("Request Headers:", req.headers); // Log all headers
+
     const hash = req.header("user-hash");
+    console.log("user-hash:", hash); // Log specific header
 
     if (!hash) {
       return res.status(401).json({ message: "No hash, authorization denied" });
