@@ -243,6 +243,7 @@ export const getUserChats = async (req, res) => {
             profilePicture: otherUser.profilePicture,
             isActive: otherUser.isActive,
           },
+          unreadCount: 0, // You can add logic to calculate unreadCount
           createdAt: chat.createdAt,
           updatedAt: chat.updatedAt,
           __v: chat.__v,
