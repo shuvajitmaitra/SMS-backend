@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 // Import routes
 import userRoutes from "./routes/userRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
+import messageRoutes from "./routes/messageRoutes.js";
 
 const app = express();
 
@@ -30,5 +31,6 @@ app.get("/", (req, res) => {
 // Mount routes
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/chat", chatRoutes);
+app.use("/api/v1/message", messageRoutes);
 
 export { app };
