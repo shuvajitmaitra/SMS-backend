@@ -64,6 +64,12 @@ const messageSchema = new Schema(
       of: Number,
       default: {},
     },
+    replyTo: {
+      // Newly added field
+      type: Schema.Types.ObjectId,
+      ref: "Message",
+      default: null,
+    },
     editedAt: {
       type: Date,
       default: null,

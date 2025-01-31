@@ -11,17 +11,46 @@ const {
 
 export const getMessages = async (req, res) => {
   try {
-    const { chatId } = req.query;
+    const { chatId, limit = 50, skip = 0 } = req.query;
 
-    let filter = {};
-    if (chatId) {
-      if (!ObjectId.isValid(chatId)) {
-        return res.status(400).json({ message: "Invalid chatId." });
-      }
-      filter.chat = chatId;
+    // Validate chatId
+    if (!chatId) {
+      return res.status(400).json({ message: "chatId is required." });
     }
 
-    // Fetch messages and populate sender and replyTo fields
+    if (!ObjectId.isValid(chatId)) {
+      return res.status(400).json({ message: "Invalid chatId." });
+    }
+
+    // Retrieve userId from authenticated user
+    const userId = req.user && req.user._id;
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized: User not authenticated." });
+    }
+
+    // Authorization: Check if the user is part of the chat
+    const chat = await Chat.findById(chatId).select("users");
+    if (!chat) {
+      return res.status(404).json({ message: "Chat not found." });
+    }
+
+    const isParticipant = chat.users.some((participant) => participant.equals(userId));
+    if (!isParticipant) {
+      return res.status(403).json({ message: "Access denied." });
+    }
+
+    // Define filter
+    const filter = { chat: chatId };
+
+    // Parse and validate pagination parameters
+    const parsedLimit = parseInt(limit, 10);
+    const parsedSkip = parseInt(skip, 10);
+
+    if (isNaN(parsedLimit) || isNaN(parsedSkip) || parsedLimit < 1 || parsedSkip < 0) {
+      return res.status(400).json({ message: "Invalid pagination parameters." });
+    }
+
+    // Fetch messages with pagination and populate fields
     const messages = await Message.find(filter)
       .populate("sender", "displayName profilePicture") // Populate sender details
       .populate({
@@ -32,7 +61,10 @@ export const getMessages = async (req, res) => {
         },
         select: "text createdAt", // Select fields to include from the replied message
       })
-      .sort({ createdAt: 1 }); // Sort messages by creation time
+      .sort({ createdAt: 1 }) // Sort messages by creation time
+      .limit(parsedLimit)
+      .skip(parsedSkip)
+      .exec(); // Execute the query
 
     return res.status(200).json({ data: messages });
   } catch (error) {
