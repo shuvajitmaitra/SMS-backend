@@ -2,8 +2,11 @@
 
 import express from "express";
 import { sendMessage, updateMessage, deleteMessage, getMessages, addReaction } from "../controllers/messageController.js";
+import { authenticateUser } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
+
+router.use(authenticateUser);
 
 // Route to send a new message
 router.post("/send", sendMessage);
