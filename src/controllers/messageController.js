@@ -94,7 +94,8 @@ export const sendMessage = async (req, res) => {
     }
 
     // Check if sender exists
-    const sender = await User.findById(senderId);
+    const sender = await User.findOne(senderId);
+
     if (!sender) {
       return res.status(404).json({ message: "Sender not found." });
     }
@@ -118,7 +119,11 @@ export const sendMessage = async (req, res) => {
 
     // Create the message
     const message = new Message({
-      sender: senderId,
+      sender: {
+        _id: sender._id,
+        displayName: sender.displayName,
+        profilePicture: sender.profilePicture,
+      },
       chat: chatId,
       text: text || "",
       image: image || "",
