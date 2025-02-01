@@ -136,12 +136,10 @@ export const sendMessage = async (req, res) => {
     // chat.messages.push(savedMessage._id);
     // await chat.save();
 
-    return res
-      .status(201)
-      .json({
-        message: "Message sent successfully.",
-        data: { ...savedMessage, sender: { _id: senderId, displayName: sender.displayName, profilePicture: sender.profilePicture } },
-      });
+    return res.status(201).json({
+      message: "Message sent successfully.",
+      data: { ...savedMessage._doc, sender: { _id: senderId, displayName: sender.displayName, profilePicture: sender.profilePicture } },
+    });
   } catch (error) {
     console.error("Error in sendMessage:", error);
     return res.status(500).json({ message: "Internal server error." });
