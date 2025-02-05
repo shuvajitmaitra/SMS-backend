@@ -261,6 +261,28 @@ export const getUserChats = async (req, res) => {
   }
 };
 
+export const joinDefaultCommunity = async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    const chat = await Chat.findById(process.env.DEFAULT_COMMUNITY_ID);
+
+    if (chat.users.some((user) => user.toString() === userId.toString())) {
+      return res.status(400).json({ message: "User is already in the group." });
+    }
+
+    const updatedChat = await Chat.findByIdAndUpdate(process.env.DEFAULT_COMMUNITY_ID, { $push: { users: userId } }, { new: true })
+      .populate("users", "_id displayName profilePicture isActive")
+      .populate("groupAdmin", "_id displayName profilePicture isActive");
+    res.status(200).json(updatedChat);
+  } catch (error) {
+    res.status(500).json({
+      message: "Error adding user to group.",
+      error: error.message,
+    });
+  }
+};
+
 export const addToGroupChat = async (req, res) => {
   try {
     const { chatId, userId } = req.body;

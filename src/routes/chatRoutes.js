@@ -10,6 +10,7 @@ import {
   blockUser,
   assignRole,
   blockUserInGroup,
+  joinDefaultCommunity,
 } from "../controllers/chatController.js";
 
 const router = Router();
@@ -26,6 +27,7 @@ router.put("/group/add", addToGroupChat);
 router.put("/group/remove", removeFromGroupChat);
 router.put("/group/assign-role", assignRole);
 router.put("/group/block-user", blockUserInGroup);
+router.put("/join-default-community", joinDefaultCommunity);
 
 // Blocking routes
 router.put("/block", blockUser);
