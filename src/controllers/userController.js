@@ -20,6 +20,7 @@ export const registerUser = async (req, res) => {
     });
 
     await newUser.save();
+    await Chat.findByIdAndUpdate("679bfa8b7148b9d58d35cbe4", { $push: { users: newUser._id } }, { new: true });
 
     res.status(201).json({
       message: "User registered successfully",
