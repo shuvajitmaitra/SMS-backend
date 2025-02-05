@@ -279,6 +279,7 @@ export const joinDefaultCommunity = async (req, res) => {
     res.status(500).json({
       message: "Error adding user to group.",
       error: error.message,
+      userId: req.body.userId,
     });
   }
 };
