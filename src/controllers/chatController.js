@@ -266,13 +266,13 @@ export const joinDefaultCommunity = async (req, res) => {
     const { userId } = req.body;
 
     // First check if default community exists
-    const chat = await Chat.findById(process.env.DEFAULT_COMMUNITY_ID);
+    const chat = await Chat.findById("679bfa8b7148b9d58d35cbe4");
 
     // Handle missing community
     if (!chat) {
       return res.status(404).json({
         message: "Default community not found",
-        communityId: process.env.DEFAULT_COMMUNITY_ID,
+        communityId: process.env.DEFAULT_COMMUNITY_ID || "mmmmm",
       });
     }
 
