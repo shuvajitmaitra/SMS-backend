@@ -2,6 +2,7 @@
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import User from "../models/User.js";
+import Chat from "../models/Chat.js";
 
 export const registerUser = async (req, res) => {
   try {
