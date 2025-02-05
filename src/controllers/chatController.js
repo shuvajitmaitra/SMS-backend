@@ -265,15 +265,27 @@ export const joinDefaultCommunity = async (req, res) => {
   try {
     const { userId } = req.body;
 
+    // First check if default community exists
     const chat = await Chat.findById(process.env.DEFAULT_COMMUNITY_ID);
 
+    // Handle missing community
+    if (!chat) {
+      return res.status(404).json({
+        message: "Default community not found",
+        communityId: process.env.DEFAULT_COMMUNITY_ID,
+      });
+    }
+
+    // Then check user membership
     if (chat.users.some((user) => user.toString() === userId.toString())) {
       return res.status(400).json({ message: "User is already in the group." });
     }
 
+    // Proceed with update
     const updatedChat = await Chat.findByIdAndUpdate(process.env.DEFAULT_COMMUNITY_ID, { $push: { users: userId } }, { new: true })
       .populate("users", "_id displayName profilePicture isActive")
       .populate("groupAdmin", "_id displayName profilePicture isActive");
+
     res.status(200).json(updatedChat);
   } catch (error) {
     res.status(500).json({
