@@ -3,29 +3,46 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import User from "../models/User.js";
 import Chat from "../models/Chat.js";
+import { generateTokens } from "../middlewares/authMiddleware.js";
 
 export const registerUser = async (req, res) => {
   try {
-    const { displayName, pin } = req.body;
+    const { displayName, username, password, pin } = req.body;
 
-    console.log("displayName", JSON.stringify(displayName, null, 2));
-    console.log("pin", JSON.stringify(pin, null, 2));
+    // Check if user already exists
+    const userExists = await User.findOne({ username: username.toLowerCase() });
+    if (userExists) {
+      return res.status(400).json({ success: false, message: "User already exists" });
+    }
+
+    // Validate input
+    if (!displayName || !username || !password || !pin) {
+      return res.status(400).json({ success: false, message: "All fields are required" });
+    }
+
     const salt = await bcrypt.genSalt(Number(process.env.PASSWORD_SALT_ROUNDS));
     const hashedPin = await bcrypt.hash(pin, salt);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     // Create new user
     const newUser = new User({
       displayName,
+      username: username.toLowerCase(),
+      password: hashedPassword,
       pin: hashedPin,
       isActive: true,
     });
 
     await newUser.save();
     await Chat.findByIdAndUpdate("679bfa8b7148b9d58d35cbe4", { $push: { users: newUser._id } }, { new: true });
+    const token = generateTokens(username);
 
     res.status(201).json({
+      token,
+      success: true,
       message: "User registered successfully",
       hash: newUser._id,
+      userExists,
     });
   } catch (error) {
     res.status(500).json({
@@ -37,35 +54,43 @@ export const registerUser = async (req, res) => {
 
 export const loginUser = async (req, res) => {
   try {
-    const { hash: _id, pin } = req.body;
+    const { username, password, pin } = req.body;
+
+    // Validate input
+    if (!username || !password || !pin) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
 
     // Find user
-    const user = await User.findOne({ _id });
+    const user = await User.findOne({ username: username.toLowerCase() });
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
     // Check password
+    const isPassMatch = await bcrypt.compare(password, user.password);
+    if (!isPassMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+    // Check pin
     const isMatch = await bcrypt.compare(pin, user.pin);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
     user.lastLogin = new Date();
     await user.save();
-
+    const token = generateTokens(username);
     res.status(200).json({
-      message: "Recover successful",
-      hash: user._id,
+      token,
+      message: "Logged in successful",
     });
   } catch (error) {
     res.status(500).json({
-      message: "Recover failed",
+      message: "Login failed",
       error: error.message,
     });
   }
 };
-
-// Existing login and register methods...
 
 export const resetPin = async (req, res) => {
   try {

@@ -9,6 +9,21 @@ const userSchema = new mongoose.Schema(
       minlength: 3,
       maxlength: 50,
     },
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+      minlength: 4,
+      maxlength: 50,
+    },
+    password: {
+      type: String,
+      required: true,
+      minlength: 6,
+      maxlength: 1024,
+    },
     pin: {
       type: String,
       required: true,
