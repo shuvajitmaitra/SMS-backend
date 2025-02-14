@@ -174,3 +174,25 @@ export const resetPassword = async (req, res) => {
     });
   }
 };
+export const refreshToken = async (req, res) => {
+  const { refreshToken } = req.body;
+  if (!refreshToken) {
+    return res.status(401).json({ error: "No refresh token provided." });
+  }
+
+  jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ error: "Invalid refresh token." });
+    }
+    const userId = decoded._id;
+    const newAccessToken = jwt.sign({ _id: userId }, process.env.JWT_SECRET, {
+      expiresIn: process.env.JWT_EXPIRATION,
+    });
+    const newRefreshToken = jwt.sign({ _id: userId }, process.env.REFRESH_TOKEN_SECRET, {
+      expiresIn: "7d",
+    });
+
+    // Optionally, update the refresh token in your DB
+    return res.json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
+  });
+};
