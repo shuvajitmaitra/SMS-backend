@@ -61,7 +61,7 @@ export const getMessages = async (req, res) => {
         },
         select: "text createdAt", // Select fields to include from the replied message
       })
-      .sort({ createdAt: 1 }) // Sort messages by creation time
+      .sort({ createdAt: -1 }) // Sort messages by creation time
       .limit(parsedLimit)
       .skip(skip)
       .exec(); // Execute the query
