@@ -35,7 +35,7 @@ export const registerUser = async (req, res) => {
 
     await newUser.save();
     await Chat.findByIdAndUpdate("679bfa8b7148b9d58d35cbe4", { $push: { users: newUser._id } }, { new: true });
-    const token = generateTokens(username);
+    const token = generateTokens(newUser._id);
 
     res.status(201).json({
       token,
@@ -79,7 +79,7 @@ export const loginUser = async (req, res) => {
     }
     user.lastLogin = new Date();
     await user.save();
-    const token = generateTokens(username);
+    const token = generateTokens(user._id);
     res.status(200).json({
       token,
       message: "Logged in successful",
