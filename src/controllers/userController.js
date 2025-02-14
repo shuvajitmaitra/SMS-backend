@@ -58,24 +58,24 @@ export const loginUser = async (req, res) => {
 
     // Validate input
     if (!username || !password || !pin) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res.status(400).json({ message: "All fields are required", success: false, data: null });
     }
 
     // Find user
     const user = await User.findOne({ username: username.toLowerCase() });
     if (!user) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({ message: "Invalid credentials", success: false, data: null });
     }
 
     // Check password
     const isPassMatch = await bcrypt.compare(password, user.password);
     if (!isPassMatch) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({ message: "Invalid credentials", success: false, data: null });
     }
     // Check pin
     const isMatch = await bcrypt.compare(pin, user.pin);
     if (!isMatch) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({ message: "Invalid credentials", success: false, data: null });
     }
     user.lastLogin = new Date();
     await user.save();
@@ -83,11 +83,15 @@ export const loginUser = async (req, res) => {
     res.status(200).json({
       token,
       message: "Logged in successful",
+      success: true,
+      data: user,
     });
   } catch (error) {
     res.status(500).json({
       message: "Login failed",
       error: error.message,
+      success: false,
+      data: null,
     });
   }
 };
