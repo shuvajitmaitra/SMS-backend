@@ -11,44 +11,43 @@ const {
 
 export const getMessages = async (req, res) => {
   try {
-    const { chatId, limit = 50, skip = 0 } = req.query;
+    const { chatId, limit = 50, page = 1 } = req.query;
 
-    // Validate chatId
     if (!chatId) {
-      return res.status(400).json({ message: "chatId is required." });
+      return res.status(400).json({ message: "chatId is required.", success: false, data: null });
     }
 
     if (!ObjectId.isValid(chatId)) {
-      return res.status(400).json({ message: "Invalid chatId." });
+      return res.status(400).json({ message: "Invalid chatId.", success: false, data: null });
     }
 
-    // Retrieve userId from authenticated user
     const userId = req.user && req.user._id;
     if (!userId) {
-      return res.status(401).json({ message: "Unauthorized: User not authenticated." });
+      return res.status(401).json({ message: "Unauthorized: User not authenticated.", success: false, data: null });
     }
 
-    // Authorization: Check if the user is part of the chat
     const chat = await Chat.findById(chatId).select("users");
     if (!chat) {
-      return res.status(404).json({ message: "Chat not found." });
+      return res.status(404).json({ message: "Chat not found.", success: false, data: null });
     }
 
     const isParticipant = chat.users.some((participant) => participant.equals(userId));
     if (!isParticipant) {
-      return res.status(403).json({ message: "Access denied." });
+      return res.status(403).json({ message: "Access denied.", success: false, data: null });
     }
+
+    const parsedLimit = parseInt(limit, 10);
+    const parsedPage = parseInt(page, 10);
+
+    if (isNaN(parsedLimit) || isNaN(parsedPage) || parsedLimit < 1 || parsedPage < 1) {
+      return res.status(400).json({ message: "Invalid pagination parameters.", success: false, data: null });
+    }
+
+    // Calculate skip based on page number
+    const skip = (parsedPage - 1) * parsedLimit;
 
     // Define filter
     const filter = { chat: chatId };
-
-    // Parse and validate pagination parameters
-    const parsedLimit = parseInt(limit, 10);
-    const parsedSkip = parseInt(skip, 10);
-
-    if (isNaN(parsedLimit) || isNaN(parsedSkip) || parsedLimit < 1 || parsedSkip < 0) {
-      return res.status(400).json({ message: "Invalid pagination parameters." });
-    }
 
     // Fetch messages with pagination and populate fields
     const messages = await Message.find(filter)
@@ -63,13 +62,13 @@ export const getMessages = async (req, res) => {
       })
       .sort({ createdAt: 1 }) // Sort messages by creation time
       .limit(parsedLimit)
-      .skip(parsedSkip)
+      .skip(skip)
       .exec(); // Execute the query
 
-    return res.status(200).json({ data: messages });
+    return res.status(200).json({ message: "Messages fetched successfully.", data: messages, success: true });
   } catch (error) {
     console.error("Error in getMessages:", error);
-    return res.status(500).json({ message: "Internal server error." });
+    return res.status(500).json({ message: "Internal server error.", success: false, data: null });
   }
 };
 
