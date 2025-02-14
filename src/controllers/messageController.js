@@ -3,6 +3,7 @@ import User from "../models/User.js";
 import Chat from "../models/Chat.js";
 // Utility function to validate ObjectId
 import mongoose from "mongoose";
+import { err } from "../constants/errorHandle.js";
 const {
   Types: { ObjectId },
 } = mongoose;
@@ -74,44 +75,44 @@ export const getMessages = async (req, res) => {
 
 export const sendMessage = async (req, res) => {
   try {
-    const { senderId, chatId, text, image, audio, video, replyTo } = req.body;
-
+    const { chatId, text, image, audio, video, replyTo } = req.body;
+    const senderId = req.user && req.user._id;
     // Validate required fields
     if (!senderId || !chatId) {
-      return res.status(400).json({ message: "senderId and chatId are required." });
+      return res.status(400).json({ message: "senderId and chatId are required.", success: false, data: null });
     }
 
     // Validate ObjectIds
     if (!ObjectId.isValid(senderId)) {
-      return res.status(400).json({ message: "Invalid senderId." });
+      return res.status(400).json({ message: "Invalid senderId.", ...err });
     }
     if (!ObjectId.isValid(chatId)) {
-      return res.status(400).json({ message: "Invalid chatId." });
+      return res.status(400).json({ message: "Invalid chatId.", ...err });
     }
     if (replyTo && !ObjectId.isValid(replyTo)) {
-      return res.status(400).json({ message: "Invalid replyTo message ID." });
+      return res.status(400).json({ message: "Invalid replyTo message ID.", ...err });
     }
 
     // Check if sender exists
     const sender = await User.findById(senderId);
     if (!sender) {
-      return res.status(404).json({ message: "Sender not found." });
+      return res.status(404).json({ message: "Sender not found.", ...err });
     }
 
     // Check if chat exists
     const chat = await Chat.findById(chatId);
     if (!chat) {
-      return res.status(404).json({ message: "Chat not found." });
+      return res.status(404).json({ message: "Chat not found.", ...err });
     }
 
     // If replyTo is provided, check if the referenced message exists and belongs to the same chat
     if (replyTo) {
       const parentMessage = await Message.findById(replyTo);
       if (!parentMessage) {
-        return res.status(404).json({ message: "Parent message not found for reply." });
+        return res.status(404).json({ message: "Parent message not found for reply.", ...err });
       }
       if (parentMessage.chat.toString() !== chatId) {
-        return res.status(400).json({ message: "Cannot reply to a message from a different chat." });
+        return res.status(400).json({ message: "Cannot reply to a message from a different chat.", ...err });
       }
     }
     // console.log("sender", JSON.stringify(sender, null, 2));
@@ -137,11 +138,12 @@ export const sendMessage = async (req, res) => {
 
     return res.status(201).json({
       message: "Message sent successfully.",
+      success: true,
       data: { ...savedMessage._doc, sender: { _id: senderId, displayName: sender.displayName, profilePicture: sender.profilePicture } },
     });
   } catch (error) {
     console.error("Error in sendMessage:", error);
-    return res.status(500).json({ message: "Internal server error." });
+    return res.status(500).json({ message: "Internal server error.", ...err });
   }
 };
 
