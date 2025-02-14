@@ -84,7 +84,17 @@ export const loginUser = async (req, res) => {
       token,
       message: "Logged in successful",
       success: true,
-      data: user,
+      data: {
+        _id: user._id,
+        displayName: user.displayName,
+        username: user.username,
+        profilePicture: user.profilePicture,
+        isActive: user.isActive,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        __v: user.__v,
+        lastLogin: user.lastLogin,
+      },
     });
   } catch (error) {
     res.status(500).json({

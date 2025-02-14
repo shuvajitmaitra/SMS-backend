@@ -1,6 +1,5 @@
 // src/middlewares/authMiddleware.js
 import jwt from "jsonwebtoken";
-import User from "../models/User.js";
 
 export const authenticateUser = (req, res, next) => {
   // Retrieve token from the Authorization header (Bearer token)
@@ -9,18 +8,15 @@ export const authenticateUser = (req, res, next) => {
     return res.status(401).json({ error: "No token provided." });
   }
 
-  const token = authHeader.split(" ")[1]; // Expecting format "Bearer <token>"
+  const token = authHeader.split(" ")[1];
   if (!token) {
     return res.status(401).json({ error: "Malformed token." });
   }
 
-  // Verify the token using the secret from environment variables
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
       return res.status(403).json({ error: "Failed to authenticate token." });
     }
-
-    // Attach decoded user info to request object
     req.user = decoded;
     next();
   });
