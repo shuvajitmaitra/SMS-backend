@@ -4,6 +4,7 @@ import crypto from "crypto";
 import User from "../models/User.js";
 import Chat from "../models/Chat.js";
 import { generateTokens } from "../middlewares/authMiddleware.js";
+import jwt from "jsonwebtoken";
 
 export const registerUser = async (req, res) => {
   try {
@@ -192,7 +193,6 @@ export const refreshToken = async (req, res) => {
       expiresIn: "7d",
     });
 
-    // Optionally, update the refresh token in your DB
     return res.json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
   });
 };
