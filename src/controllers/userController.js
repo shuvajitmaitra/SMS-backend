@@ -9,6 +9,21 @@ import jwt from "jsonwebtoken";
 export const registerUser = async (req, res) => {
   try {
     const { displayName, username, password, pin } = req.body;
+    if (username.length < 4) {
+      return res.status(400).json({ success: false, message: "Username must be at least 4 characters" });
+    }
+
+    if (displayName.length < 3) {
+      return res.status(400).json({ success: false, message: "Display name must be at least 3 characters" });
+    }
+
+    if (pin.length < 4 || pin.length > 4) {
+      return res.status(400).json({ success: false, message: "Pin must be at least 4 characters" });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ success: false, message: "Password must be at least 6 characters" });
+    }
 
     // Check if user already exists
     const userExists = await User.findOne({ username: username.toLowerCase() });
@@ -56,6 +71,8 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   try {
     const { username, password, pin } = req.body;
+    console.log("username", JSON.stringify(username, null, 2));
+    console.log("password", JSON.stringify(password, null, 2));
 
     // Validate input
     if (!username || !password || !pin) {
@@ -64,6 +81,7 @@ export const loginUser = async (req, res) => {
 
     // Find user
     const user = await User.findOne({ username: username.toLowerCase() });
+    console.log("user", JSON.stringify(user, null, 2));
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials", success: false, data: null });
     }
@@ -73,11 +91,13 @@ export const loginUser = async (req, res) => {
     if (!isPassMatch) {
       return res.status(401).json({ message: "Invalid credentials", success: false, data: null });
     }
+    console.log("isPassMatch", JSON.stringify(isPassMatch, null, 2));
     // Check pin
     const isMatch = await bcrypt.compare(pin, user.pin);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials", success: false, data: null });
     }
+    console.log("isMatch", JSON.stringify(isMatch, null, 2));
     user.lastLogin = new Date();
     await user.save();
     const token = generateTokens(user._id);
