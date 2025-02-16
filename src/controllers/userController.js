@@ -13,7 +13,7 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ success: false, message: "Username must be at least 4 characters" });
     }
 
-    if (displayName.length < 3) {
+    if (displayName.length < 4) {
       return res.status(400).json({ success: false, message: "Display name must be at least 3 characters" });
     }
 
